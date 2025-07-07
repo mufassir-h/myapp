@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp
-  namespace: green
+  namespace: production
 spec:
   replicas: 2
   selector:
@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: myapp
-        image: dockerhubuser/myapp:v2
+        image: mufassirrafi/myapp:latest
         ports:
         - containerPort: 3000
 ---
@@ -23,7 +23,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: myapp-service
-  namespace: green
+  namespace: production
 spec:
   selector:
     app: myapp
