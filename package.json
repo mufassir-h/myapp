@@ -1,7 +1,7 @@
 {
   "name": "myapp",
   "version": "1.0.0",
-  "description": "Contoh aplikasi Node.js untuk Blue-Green Deployment",
+  "description": "Contoh aplikasi Node.js",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
