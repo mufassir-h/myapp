@@ -7,7 +7,7 @@ RUN npm install
 
 COPY . .
 
-ENV VERSION=v1-blue
+ENV VERSION=v1
 EXPOSE 3000
 
 CMD ["npm", "start"]
