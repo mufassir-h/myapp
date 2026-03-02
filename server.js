@@ -2,10 +2,10 @@ const express = require('express');
 const app = express();
 const port = 3000;
 
-const version = process.env.VERSION || 'v1.6';
+const version = process.env.VERSION || 'v1.7';
 
 app.get('/', (req, res) => {
-  res.send(`Welcome ${version}`);
+  res.send(`Welcome to new application version ${version}`);
 });
 
 app.get('/health', (req, res) => {
