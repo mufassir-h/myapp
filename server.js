@@ -5,7 +5,7 @@ const port = 3000;
 const version = process.env.VERSION || 'v1';
 
 app.get('/', (req, res) => {
-  res.send(`SELAMAT DATANG DI SERVER TEST VERSI ${version}`);
+  res.send(`SELAMAT DATANG DI SERVER TEST ${version}`);
 });
 
 app.get('/health', (req, res) => {
