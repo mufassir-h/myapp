@@ -1,18 +1,15 @@
 pipeline {
-    agent any // Menjalankan pipeline pada Jenkins agent mana pun
+    agent any
 
     environment {
-        // Ganti dengan username Docker Hub Anda
         DOCKERHUB_USERNAME = 'mufassirrafi'
-        // Ganti dengan nama image yang diinginkan
         IMAGE_NAME = "myapp"
-        // Menggunakan Build_ID Jenkins sebagai tag, atau bisa juga 'latest'
         IMAGE_TAG = "${env.BUILD_ID}"
-        // ID kredensial Docker Hub yang Anda buat di Jenkins
         DOCKER_CREDENTIAL_ID = 'dockerhub-creds'
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', url: 'https://github.com/mufassir-h/myapp.git'
@@ -23,8 +20,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Pastikan Dockerfile ada di root repository
-                    // Perintah ini akan membangun image Docker
                     docker.build("${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}")
                     echo "Docker image built: ${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
                 }
@@ -34,52 +29,45 @@ pipeline {
         stage('Push Docker Image to Docker Hub') {
             steps {
                 script {
-                    // Menggunakan kredensial Docker Hub yang disimpan di Jenkins
                     docker.withRegistry("https://registry.hub.docker.com", DOCKER_CREDENTIAL_ID) {
                         docker.image("${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}").push()
                     }
                     echo "Docker image pushed to Docker Hub."
                 }
             }
-          stage('Deploy Docker Container') {
-              steps {
-                  script {
-                      def image = "${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}"
-          
-                      sh '''
-                      IMAGE='''' + image + ''''
-          
-                      echo "Pull latest image from Docker Hub"
-                      docker pull $IMAGE
-          
-                      # Menentukan port awal
-                      PORT=3000
-          
-                      # Mencari port yang belum dipakai
-                      while ss -tuln | grep -q ":$PORT"; do
-                          echo "Port $PORT already in use. Trying next port..."
-                          PORT=$((PORT+1))
-                      done
-          
-                      echo "Using port $PORT for deployment"
-          
-                      # Menjalankan container
-                      docker run -d -p $PORT:3000 --name myapp-$PORT $IMAGE
-          
-                      echo "Application deployed on port $PORT"
-                      '''
         }
-    }
-}
+
+        stage('Deploy Docker Container') {
+            steps {
+                script {
+                    sh """
+                    IMAGE=${DOCKERHUB_USERNAME}/${IMAGE_NAME}:${IMAGE_TAG}
+
+                    echo "Pulling latest image"
+                    docker pull \$IMAGE
+
+                    PORT=3000
+
+                    while ss -tuln | grep -q ":\$PORT"; do
+                        echo "Port \$PORT already used, trying next port"
+                        PORT=\$((PORT+1))
+                    done
+
+                    echo "Deploying container on port \$PORT"
+
+                    docker run -d -p \$PORT:3000 --name myapp-\$PORT \$IMAGE
+
+                    echo "Application deployed at port \$PORT"
+                    """
+                }
+            }
         }
+
     }
 
     post {
         always {
-            // Memberikan informasi setelah pipeline selesai, berhasil atau gagal
             echo "Pipeline finished."
-            // Opsional: Membersihkan workspace setelah selesai
-            // cleanWs()
         }
         success {
             echo "Pipeline completed successfully!"
